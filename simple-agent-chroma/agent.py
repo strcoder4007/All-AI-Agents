@@ -9,6 +9,16 @@ import pinecone
 
 load_dotenv()
 
+# import tensorflow as tf
+# import tensorflow_hub as hub
+
+# # Load the USE model
+# module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
+# embed = hub.load(module_url)
+
+# def get_embeddings(texts):
+#     return embed(texts).numpy()
+
 
 # Initialize Pinecone
 pinecone.init(api_key=os.getenv("PINECONE_API_KEY"), environment="your_environment")

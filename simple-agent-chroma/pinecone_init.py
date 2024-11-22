@@ -21,7 +21,7 @@ pc = Pinecone(api_key=api_key)
 
 pc.create_index(
   name="first",
-  dimension=512,
+  dimension=1024,
   metric="cosine",
   spec=ServerlessSpec(
     cloud="aws",

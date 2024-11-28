@@ -5,7 +5,6 @@ from langchain_ollama import OllamaLLM
 from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone import ServerlessSpec
 import fitz
-import time
 import numpy as np
 
 # Load environment variables
@@ -78,11 +77,37 @@ if uploaded_file is not None:
         namespace="default"
     )
 
-    time.sleep(10)  # Wait for the upserted vectors to be indexed
+    st.write(f"File embeddings saved!")
 
-    print(index.describe_index_stats())
-        
+# Create two columns for input and button
+col1, col2 = st.columns(2)
 
+with col1:
+    query = st.text_input("Chat with your doc")
+
+with col2:
+    submit_button = st.button("Submit")
+
+if submit_button:
+    # Convert the query into a numerical vector that Pinecone can search with
+    query_embedding = pc.inference.embed(
+        model="multilingual-e5-large",
+        inputs=[query],
+        parameters={
+            "input_type": "query"
+        }
+    )
+
+    # Search the index for the three most similar vectors
+    results = index.query(
+        namespace="default",
+        vector=query_embedding[0].values,
+        top_k=3,
+        include_values=False,
+        include_metadata=True
+    )
+
+    print(results)
 
 
 # llm = OllamaLLM(

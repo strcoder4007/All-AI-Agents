@@ -1,23 +1,35 @@
 import os
 from dotenv import load_dotenv
-import streamlit as st
+import pinecone
 from langchain_ollama import OllamaLLM
-from pinecone.grpc import PineconeGRPC as Pinecone
-from pinecone import ServerlessSpec
-import fitz
-import numpy as np
+import fitz  # PyMuPDF for PDF processing
+import json
+import streamlit as st
 import requests
 
 # Load environment variables
 load_dotenv()
 
-pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-index = pc.Index("first")
+# Initialize Pinecone client
+pc = pinecone.Pinecone(
+    api_key=os.environ.get("PINECONE_API_KEY"),
+    environment="us-east-1-aws"
+)
+
+
+# Connect to the index
+pinecone_client = pc.Index('first')
+
+llm = OllamaLLM(
+    model="llama3.1:8b",
+    base_url="http://localhost:11434"
+)
 
 # Streamlit app title
 st.title("Search from Docs")
 
 def extract_text_from_pdf(file_path):
+    """Extract text from a PDF file."""
     doc = fitz.open(file_path)
     text = ""
     for page_num in range(len(doc)):
@@ -25,6 +37,7 @@ def extract_text_from_pdf(file_path):
     return text
 
 def chunk_text(text, max_length=256):
+    """Chunk text into smaller segments."""
     words = text.split()
     chunks = []
     current_chunk = []
@@ -36,118 +49,93 @@ def chunk_text(text, max_length=256):
         else:
             current_chunk.append(word)
 
-    # Add the last chunk
     if current_chunk:
         chunks.append(' '.join(current_chunk))
 
     return chunks
 
-# File uploader in Streamlit
-uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"])
+def embed_text(texts, input_type="passage"):
+    return pc.inference.embed(
+        model="multilingual-e5-large",
+        inputs=texts,
+        parameters={
+            "input_type": input_type
+        }
+    )
+
+def upsert_records(index, records):
+    """Upsert records into the Pinecone index."""
+    try:
+        index.upsert(vectors=records)
+        st.success("Records upserted successfully.")
+    except Exception as e:
+        st.error(f"Failed to upsert records: {e}")
+
+# Handle file upload
+uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
 
 if uploaded_file is not None:
     # Save the uploaded file temporarily
-    with open(f"temp_{uploaded_file.name}", "wb") as f:
+    with open("temp.pdf", "wb") as f:
         f.write(uploaded_file.getbuffer())
-    
+
     # Extract text from the PDF
-    text = extract_text_from_pdf(f"temp_{uploaded_file.name}")
+    text = extract_text_from_pdf("temp.pdf")
+
+    os.remove("temp.pdf")
     
     # Chunk the text
     chunks = chunk_text(text)
 
-    data = [{"id": f"doc_{i}", "text": c} for i, c in enumerate(chunks)]
+    # Generate embeddings for each chunk
+    embeddings = embed_text(chunks)
 
-    embeddings = pc.inference.embed(
-        model="multilingual-e5-large",
-        inputs=[d['text'] for d in data],
-        parameters={"input_type": "passage", "truncate": "END"}
-    )
+    # Create records with ids and values
+    records = [{"id": f"chunk_{i}", "values": embedding["values"]} for i, embedding in enumerate(embeddings)]
 
-    records = []
-    for d, e in zip(data, embeddings):
-        records.append({
-            "id": d['id'],
-            "values": e['values'],
-            "metadata": {'text': d['text']}
-        })
+    # Upsert records into the Pinecone index
+    upsert_records(pinecone_client, records)
 
-    # Upsert the records into the index
-    index.upsert(
-        vectors=records,
-        namespace="default"
-    )
+# Handle query submission
+query = st.text_input("Enter your query")
+submit_button = st.button("Submit Query")
 
-    st.write(f"File embeddings saved!")
+if submit_button and query.strip():
+    try:
+        # Convert the query into a numerical vector that Pinecone can search with
+        query_embedding = embed_text([query], input_type="query")[0]
 
-# Create two columns for input and button
-col1, col2 = st.columns(2)
+        # Search the index for the three most similar vectors
+        results = pinecone_client.query(
+            namespace="default",
+            vector=query_embedding["values"],
+            top_k=3,
+            include_values=False,
+            include_metadata=True
+        )
 
-with col1:
-    query = st.text_input("Chat with your doc")
+        # Extract document chunks from the search results
+        document_chunks = [item["metadata"]["chunk"] for item in results["matches"]]
 
-with col2:
-    submit_button = st.button("Submit")
+        # Combine document chunks into a single context string
+        context = "\n".join(document_chunks)
 
-# Convert the query into a numerical vector that Pinecone can search with
-query_embedding = pc.inference.embed(
-    model="multilingual-e5-large",
-    inputs=[query],
-    parameters={
-        "input_type": "query"
-    }
-)
+        # Prepare the data payload
+        data = {
+            "prompt": query,
+            "context": context
+        }
 
-# Search the index for the three most similar vectors
-results = index.query(
-    namespace="default",
-    vector=query_embedding[0].values,
-    top_k=3,
-    include_values=False,
-    include_metadata=True
-)
+        # Send the request to the LLM using Ollama's API
+        response = requests.post(f"{llm.base_url}/api/predict", json=data, headers={"Content-Type": "application/json"})
 
-print(results)
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Display the generated text from the LLM
+            st.write(response.json().get("generated_text"))
+        else:
+            # Display the error message if the request failed
+            st.error(f"Error: {response.status_code} - {response.text}")
 
-
-llm = OllamaLLM(
-  model="llama3.1:8b",
-  base_url="http://localhost:11434"
-)
-
-
-def extract_texts_from_response(json_data):
-    # Parse the JSON data if it's not already parsed
-    if isinstance(json_data, str):
-        json_data = json.loads(json_data)
-    
-    # Extract texts from each match in the response
-    texts = [match['metadata']['text'] for match in json_data.get('matches', [])]
-    return texts
-
-
-
-# Sample document chunks and user query
-document_chunks = extract_texts_from_response(results)
-
-user_query = "What does the document say about?"
-
-# Combine document chunks into a single context string
-context = "\n".join(document_chunks)
-
-# Prepare the data payload
-data = {
-    "prompt": user_query,
-    "context": context
-}
-
-# Send the request to the LLM using Ollama's API
-response = requests.post(f"{llm.base_url}/api/predict", json=data, headers={"Content-Type": "application/json"})
-
-# Check if the request was successful
-if response.status_code == 200:
-    # Print the generated text from the LLM
-    print(response.json().get("generated_text"))
-else:
-    # Print the error message if the request failed
-    print(f"Error: {response.status_code} - {response.text}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")

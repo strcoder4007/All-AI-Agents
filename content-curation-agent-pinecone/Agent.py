@@ -6,6 +6,7 @@ from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone import ServerlessSpec
 import fitz
 import numpy as np
+import requests
 
 # Load environment variables
 load_dotenv()
@@ -88,29 +89,65 @@ with col1:
 with col2:
     submit_button = st.button("Submit")
 
-if submit_button:
-    # Convert the query into a numerical vector that Pinecone can search with
-    query_embedding = pc.inference.embed(
-        model="multilingual-e5-large",
-        inputs=[query],
-        parameters={
-            "input_type": "query"
-        }
-    )
+# Convert the query into a numerical vector that Pinecone can search with
+query_embedding = pc.inference.embed(
+    model="multilingual-e5-large",
+    inputs=[query],
+    parameters={
+        "input_type": "query"
+    }
+)
 
-    # Search the index for the three most similar vectors
-    results = index.query(
-        namespace="default",
-        vector=query_embedding[0].values,
-        top_k=3,
-        include_values=False,
-        include_metadata=True
-    )
+# Search the index for the three most similar vectors
+results = index.query(
+    namespace="default",
+    vector=query_embedding[0].values,
+    top_k=3,
+    include_values=False,
+    include_metadata=True
+)
 
-    print(results)
+print(results)
 
 
-# llm = OllamaLLM(
-#   model="llama3.1:8b",
-#   base_url="http://localhost:11434"
-# )
+llm = OllamaLLM(
+  model="llama3.1:8b",
+  base_url="http://localhost:11434"
+)
+
+
+def extract_texts_from_response(json_data):
+    # Parse the JSON data if it's not already parsed
+    if isinstance(json_data, str):
+        json_data = json.loads(json_data)
+    
+    # Extract texts from each match in the response
+    texts = [match['metadata']['text'] for match in json_data.get('matches', [])]
+    return texts
+
+
+
+# Sample document chunks and user query
+document_chunks = extract_texts_from_response(results)
+
+user_query = "What does the document say about?"
+
+# Combine document chunks into a single context string
+context = "\n".join(document_chunks)
+
+# Prepare the data payload
+data = {
+    "prompt": user_query,
+    "context": context
+}
+
+# Send the request to the LLM using Ollama's API
+response = requests.post(f"{llm.base_url}/api/predict", json=data, headers={"Content-Type": "application/json"})
+
+# Check if the request was successful
+if response.status_code == 200:
+    # Print the generated text from the LLM
+    print(response.json().get("generated_text"))
+else:
+    # Print the error message if the request failed
+    print(f"Error: {response.status_code} - {response.text}")

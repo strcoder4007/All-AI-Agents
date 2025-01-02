@@ -1,0 +1,26 @@
+product_id,name,category,price,description,ingredients,skin_type
+SK001,Gentle Cleanser,Cleanser,24.99,"A gentle, non-foaming cleanser suitable for all skin types. Removes makeup and impurities while maintaining skin's natural moisture barrier.","Water, Glycerin, Ceramides, Centella Asiatica Extract, Panthenol",All
+SK002,Hydrating Moisturizer,Moisturizer,34.99,"Rich yet lightweight moisturizer that provides deep hydration for dry and normal skin. Non-comedogenic formula.","Hyaluronic Acid, Squalane, Ceramides, Shea Butter, Niacinamide",Dry/Normal
+SK003,Vitamin C Serum,Serum,49.99,"Powerful brightening serum with 15% Vitamin C. Helps reduce dark spots and improve skin tone.","L-Ascorbic Acid, Ferulic Acid, Vitamin E, Panthenol, Glycerin",All
+SK004,Niacinamide Toner,Toner,29.99,"Alcohol-free toner that helps balance oil production and minimize appearance of pores.","Niacinamide, Green Tea Extract, Panthenol, Allantoin, Glycerin",Oily/Combination
+SK005,Retinol Night Cream,Treatment,54.99,"Anti-aging night cream with retinol and peptides. Helps reduce fine lines and wrinkles.","Retinol, Peptides, Ceramides, Hyaluronic Acid, Squalane",Mature/Normal
+SK006,Clay Mask,Mask,19.99,"Deep-cleansing clay mask that absorbs excess oil and unclogs pores.","Kaolin Clay, Bentonite Clay, Charcoal, Aloe Vera, Witch Hazel",Oily/Combined
+SK007,Sunscreen SPF 50,Sunscreen,29.99,"Broad-spectrum sunscreen that protects against UVA/UVB rays. Lightweight and non-greasy.","Zinc Oxide, Titanium Dioxide, Aloe Vera, Vitamin E, Green Tea Extract",All
+SK008,Exfoliating Scrub,Exfoliator,22.99,"Gentle physical exfoliator that removes dead skin cells and promotes cell turnover.","Jojoba Beads, Aloe Vera, Glycerin, Chamomile Extract, Vitamin E",All
+SK009,Eye Cream,Eye Care,39.99,"Hydrating eye cream that reduces puffiness and dark circles.","Caffeine, Hyaluronic Acid, Peptides, Vitamin K, Green Tea Extract",All
+SK010,Acne Spot Treatment,Treatment,14.99,"Fast-acting spot treatment that reduces redness and inflammation.","Salicylic Acid, Tea Tree Oil, Zinc Oxide, Aloe Vera, Witch Hazel",Acne-Prone
+SK011,Overnight Mask,Mask,29.99,"Hydrating overnight mask that replenishes skin while you sleep.","Hyaluronic Acid, Ceramides, Squalane, Niacinamide, Centella Asiatica Extract",Dry/Normal
+SK012,Foaming Cleanser,Cleanser,18.99,"Foaming cleanser that removes dirt and oil without stripping the skin.","Salicylic Acid, Tea Tree Oil, Aloe Vera, Glycerin, Chamomile Extract",Oily/Combined
+SK013,Anti-Pollution Serum,Serum,44.99,"Protective serum that shields skin from environmental stressors.","Vitamin C, Vitamin E, Ferulic Acid, Resveratrol, Green Tea Extract",All
+SK014,Calming Cream,Moisturizer,32.99,"Soothing cream for sensitive or irritated skin. Reduces redness and discomfort.","Centella Asiatica Extract, Panthenol, Ceramides, Aloe Vera, Oat Extract",Sensitive
+SK015,Glycolic Acid Toner,Toner,27.99,"Exfoliating toner that brightens skin and improves texture.","Glycolic Acid, Aloe Vera, Witch Hazel, Glycerin, Chamomile Extract",Normal/Combined
+SK016,Detoxifying Mask,Mask,24.99,"Purifying mask that draws out impurities and detoxifies the skin.","Charcoal, Bentonite Clay, Tea Tree Oil, Aloe Vera, Witch Hazel",Oily/Acne-Prone
+SK017,Brightening Moisturizer,Moisturizer,36.99,"Moisturizer that evens skin tone and adds a radiant glow.","Niacinamide, Vitamin C, Licorice Root Extract, Hyaluronic Acid, Glycerin",All
+SK018,Peptide Serum,Serum,59.99,"Anti-aging serum that boosts collagen production and firms skin.","Peptides, Hyaluronic Acid, Vitamin C, Ceramides, Green Tea Extract",Mature
+SK019,Soothing Toner,Toner,21.99,"Alcohol-free toner that calms and hydrates sensitive skin.","Aloe Vera, Chamomile Extract, Panthenol, Allantoin, Glycerin",Sensitive
+SK020,Oil-Free Moisturizer,Moisturizer,26.99,"Lightweight moisturizer that hydrates without clogging pores.","Hyaluronic Acid, Niacinamide, Green Tea Extract, Aloe Vera, Glycerin",Oily/Acne-Prone
+SK021,Collagen Cream,Moisturizer,49.99,"Rich cream that plumps and firms skin for a youthful appearance.","Collagen, Peptides, Hyaluronic Acid, Vitamin E, Squalane",Mature
+SK022,Pore Minimizer,Treatment,29.99,"Targeted treatment that reduces the appearance of enlarged pores.","Niacinamide, Salicylic Acid, Witch Hazel, Green Tea Extract, Aloe Vera",Oily/Combined
+SK023,Hydrating Mist,Toner,16.99,"Refreshing mist that hydrates and revitalizes skin throughout the day.","Hyaluronic Acid, Rose Water, Aloe Vera, Glycerin, Chamomile Extract",All
+SK024,Charcoal Cleanser,Cleanser,19.99,"Deep-cleansing charcoal cleanser that removes impurities and excess oil.","Charcoal, Salicylic Acid, Tea Tree Oil, Aloe Vera, Glycerin",Oily/Acne-Prone
+SK025,Anti-Aging Serum,Serum,54.99,"Multi-purpose serum that targets wrinkles, fine lines, and dullness.","Retinol, Vitamin C, Hyaluronic Acid, Peptides, Green Tea Extract",Mature
